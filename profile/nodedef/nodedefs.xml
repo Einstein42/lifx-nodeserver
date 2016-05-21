@@ -1,0 +1,20 @@
+<nodeDefs>
+	<!-- NODE DEF from 5.0 document http://wiki.universal-devices.com/index.php?title=V50_MAIN -->
+	<!-- LIFX Color Bulb -->
+    <nodeDef id="lifxcolor" nls="lifx">
+        <editors />
+        <sts>
+			<st id="GV1" editor="lifxcolor" />
+            <st id="GV2" editor="lifxcolor" />
+			<st id="GV3" editor="lifxcolor" />
+			<st id="GV4" editor="lifxcolor" />
+        </sts>
+        <cmds>
+            <sends />
+            <accepts>
+                <cmd id="DON" />
+                <cmd id="DOF" />
+            </accepts>
+        </cmds>
+    </nodeDef>
+</nodeDefs>

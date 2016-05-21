@@ -1,0 +1,9 @@
+# LIFXColor
+ND-lifxcolor-NAME = LIFX Bulb
+ST-lifx-NAME = LIFX Bulb
+ST-lifx-GV1-NAME = Hue
+ST-lifx-GV2-NAME = Saturation
+ST-lifx-GV3-NAME = Brightness
+ST-lifx-GV4-NAME = Kelvin
+CMD-lifx-DON-NAME = On
+CMD-lifx-DOF-NAME = Off

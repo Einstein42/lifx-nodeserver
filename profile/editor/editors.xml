@@ -1,0 +1,5 @@
+<editors>
+    <editor id="lifxcolor">
+        <range uom="56" min="0" max="65535" prec="0" step="1" />
+    </editor>
+</editors>
