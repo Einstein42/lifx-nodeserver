@@ -13,7 +13,7 @@
     </editor>
     <!-- LIFX Duration Editor -->
     <editor id="lifxduration">
-        <range uom="42" prec="0" />
+        <range uom="42" min="0" max="65535" prec="0" step="1" />
     </editor>
     <!-- LIFX Status/Power Editor -->
     <editor id="lifxpower">

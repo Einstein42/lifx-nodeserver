@@ -46,7 +46,7 @@
 					<p id="" editor="lifxkelvin" init="CLITEMP"/>
 				</cmd>
 				<cmd id="SETD">
-					<p id="" editor="lifxclr" init="RR"/>
+					<p id="" editor="lifxduration" init="RR"/>
 				</cmd>
                 <cmd id="SET_HSBKD">
                     <p id="H" editor="lifxclr" init="GV1" />
@@ -82,7 +82,7 @@
 					<p id="" editor="lifxkelvin" init="CLITEMP"/>
 				</cmd>
 				<cmd id="SETD">
-					<p id="" editor="lifxclr" init="RR"/>
+					<p id="" editor="lifxduration" init="RR"/>
 				</cmd>
                 <cmd id="SET_HSBKD">
                     <p id="B" editor="lifxclr" init="GV3" />
