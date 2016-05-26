@@ -6,17 +6,18 @@
 Welcome to LIFX NodeServer's documentation!
 ===========================================
 
-Contents:
+This is the LIFX NodeServer for Polyglot(Universal Devices ISY integration framework). 
+This node server allows integration between the LIFX brand light bulbs and the ISY994i. 
+
+This document will document the usage of and development for Polyglot. For
+additional help, please reference the `UDI Forum
+<http://forum.universal-devices.com/forum/111-polyglot/>`_.
+
+This NodeServer is written with Python 2.7.
+
+James Milne(Einstein.42) - 2016
 
 .. toctree::
    :maxdepth: 2
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   usage

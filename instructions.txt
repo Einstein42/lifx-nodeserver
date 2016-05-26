@@ -1,1 +1,1 @@
-Nest Instructions go here.
+http://lifx-nodeserver.readthedocs.io/
