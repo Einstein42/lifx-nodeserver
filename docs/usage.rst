@@ -4,7 +4,7 @@ Usage
 Installation
 ~~~~~~~~~~~~
 
-To run the current version you should pull the default branch of outback-inverter. The `github page is here 
+To run the current version you should pull the default branch. The `github page is here 
 <https://github.com/Einstein42/lifx-nodeserver>`_.
 
 .. code-block:: bash
