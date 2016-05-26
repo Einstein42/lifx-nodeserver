@@ -15,7 +15,7 @@ To run the current version you should pull the default branch of outback-inverte
     # Go to your Polyglot/config/node_servers/ folder
 	git clone https://github.com/Einstein42/lifx-nodeserver.git
 	
-	# Restart Polyglot to recognize the new Node Server type.
+    # Restart Polyglot to recognize the new Node Server type.
 	sudo systemctl restart polyglot
 
 Now that Polyglot is restarted. Login to your Polyglot admin page::
