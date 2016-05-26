@@ -12,6 +12,9 @@ To run the current version you should pull the default branch. The `github page 
     # Install the bitstring required package this is needed for talking to the LIFXLan protocols
 	sudo pip install bitstring
 	
+    # If you run into an error about upgrading pip in the previous step then upgrade pip like so:
+	sudo pip install --upgrade pip
+	
     # Go to your Polyglot/config/node_servers/ folder
 	git clone https://github.com/Einstein42/lifx-nodeserver.git
 	
