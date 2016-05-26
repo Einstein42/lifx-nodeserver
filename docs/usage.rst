@@ -73,7 +73,11 @@ Once the ISY is back up, restart Polyglot.
 
     sudo systemctl restart polyglot
 
-You should now see the LIFX devices start populating is the ISY for consumption in programs. Enjoy!
+You should now see the LIFX devices start populating is the ISY for consumption in programs. Enjoy! 
+
+** Note if you don't see any boxes in your Bulb in ISY then try uploading the profile again in ISY. This sometimes 
+acts funny on the ISY side(we are working on that). Also if you see all the boxes but some values are empty, just 
+restart polyglot again. Everything should pop in fine. 
 
 How To Use
 ~~~~~~~~~~
