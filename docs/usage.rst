@@ -71,3 +71,22 @@ Once the ISY is back up, restart Polyglot.
     sudo systemctl restart polyglot
 
 You should now see the LIFX devices start populating is the ISY for consumption in programs. Enjoy!
+
+How To Use
+~~~~~~~~~~
+
+The LIFX Color bulbs work by using 5 settings. HSBKD or Hue, Saturation, Brightness, Kelvin, and Duration.
+Duration is the time it takes for the device to change to the requested HSBK values. This node server allows 
+you to change any of those settings individually on the node view, or all together in a program.  Included 
+are 12 pre-set colors that are included for easy color changes. This uses the LIFXLAN protocols and does NOT
+use the web api, so no internet access is required. This polls the device for changes every 5 seconds, so it will
+take up to 5 seconds to reflect changes made from external sources (like the apps). 
+
+I had to fork the existing lifxlan python module to allow for easy detection and recovery of powered off bulbs.
+
+When you initally set up the devices(or any subsequest 're-discover devices' operations) you will need to make 
+sure all the bulbs are powered on at the switches. After that if you turn them off they will show as 'Online = False'
+in the Node View. They will recover within the 5 seconds described above when power is restored and they 
+reconnect to wifi.
+
+Please contact me on the UDI forums (Einstein.42) if you have any questions or feature requests.
