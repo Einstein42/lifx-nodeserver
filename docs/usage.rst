@@ -77,10 +77,18 @@ How To Use
 
 The LIFX Color bulbs work by using 5 settings. HSBKD or Hue, Saturation, Brightness, Kelvin, and Duration.
 Duration is the time it takes for the device to change to the requested HSBK values. This node server allows 
-you to change any of those settings individually on the node view, or all together in a program.  Included 
+you to change any of those settings individually on the node view, or individually and all together in a program.  Included 
 are 12 pre-set colors that are included for easy color changes. This uses the LIFXLAN protocols and does NOT
 use the web api, so no internet access is required. This polls the device for changes every 5 seconds, so it will
 take up to 5 seconds to reflect changes made from external sources (like the apps). 
+
+.. image:: _static/screenshot.png
+   :scale: 50 %
+   :align: center
+   
+.. image:: _static/program_screenshot.png
+   :scale: 50 %
+   :align: center
 
 I had to fork the existing lifxlan python module to allow for easy detection and recovery of powered off bulbs.
 
