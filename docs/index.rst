@@ -21,3 +21,4 @@ James Milne(Einstein.42) - 2016
    :maxdepth: 2
 
    usage
+   changelog
