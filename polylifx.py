@@ -6,12 +6,13 @@
 from polyglot.nodeserver_api import SimpleNodeServer, PolyglotConnector, Node
 from polylifx_types import LIFXControl
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 class LIFXNodeServer(SimpleNodeServer):
     """ LIFX Node Server """
     controller = []
     bulbs = []
+    groups  = []
 
     def setup(self):
         self.logger = self.poly.logger

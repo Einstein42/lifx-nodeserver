@@ -61,3 +61,6 @@ CMD-lifxw-SETB-NAME = Set Brightness
 CMD-lifxw-SETK-NAME = Set Kelvin
 CMD-lifxw-SETD-NAME = Set Duration
 CMD-lifxw-SET_HSBKD-NAME = Change BKD
+
+# LIFX Groups
+ND-lifxgroup-NAME = LIFX Group

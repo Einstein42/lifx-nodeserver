@@ -2,6 +2,7 @@ from polyglot.nodeserver_api import Node
 import lifxlan
 from lifxlan.device import WorkflowException
 import time
+import random
 
 # LIFX Color Capabilities Table per device. True = Color, False = Not
 LIFX_BULB_TABLE = {
@@ -61,6 +62,13 @@ class LIFXControl(Node):
                 else:
                     self.logger.info('Adding new LIFX Non-Color Bulb: %s(%s)', name, address)
                     self.parent.bulbs.append(LIFXWhite(self.parent, self.parent.get_node('lifxcontrol'), address, name, d, hasColor, manifest))
+            gid, glabel, gupdatedat = d.get_group_tuple()
+            #Make a new group
+            gaddress = ''.join(random.choice('0123456789abcdef') for i in range(12))
+            lnode = self.parent.get_node(gaddress)
+            if not lnode:
+                self.logger.info('Adding new LIFX Group: %s ', glabel)
+                self.parent.groups.append(LIFXGroup(self.parent, self, self.parent.get_node('lifxcontrol'), gaddress, gid, glabel, gupdatedat, manifest))
         return True
 
     def query(self, **kwargs):
@@ -80,6 +88,7 @@ class LIFXColor(Node):
         self.address = address
         self.name = name
         self.device = device
+        self.label = self.device.get_label()
         self.hasColor = hasColor
         self.connected = True
         self.duration = DEFAULT_DURATION
@@ -91,7 +100,6 @@ class LIFXColor(Node):
             self.power = True if self.device.get_power() == 65535 else False
             self.color = list(self.device.get_color())
             self.uptime = nanosec_to_hours(self.device.get_uptime())
-            self.label = self.device.get_label()
             for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP')):
                 self.set_driver(driver, self.color[ind])
             self.set_driver('ST', self.power)
@@ -171,6 +179,7 @@ class LIFXWhite(Node):
         self.address = address
         self.name = name
         self.device = device
+        self.label = self.device.get_label()
         self.hasColor = hasColor
         self.connected = True
         self.duration = DEFAULT_DURATION
@@ -182,7 +191,6 @@ class LIFXWhite(Node):
             self.power = True if self.device.get_power() == 65535 else False
             self.color = list(self.device.get_color())
             self.uptime = nanosec_to_hours(self.device.get_uptime())
-            self.label = self.device.get_label()
             for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP')):
                 self.set_driver(driver, self.color[ind])
             self.set_driver('ST', self.power)
@@ -254,3 +262,54 @@ class LIFXWhite(Node):
                             'SET_HSBKD': _sethsbkd}
 
     node_def_id = 'lifxwhite'
+    
+class LIFXGroup(Node):
+    
+    def __init__(self, parent, control, primary, address, id, label, updated_at, manifest=None):
+        self.parent = parent
+        self.address = address
+        self.control = control
+        self.group = id
+        self.label = label.replace("'", "")
+        self.updated_at = updated_at
+        self.members = None
+        super(LIFXGroup, self).__init__(parent, address, 'LIFX Group ' + str(self.label), primary, manifest)
+        self.update_info()
+        
+    def update_info(self):
+        self.members = filter(lambda d: d.group == self.group, self.control.lifx_connector.get_lights())
+        return True
+            
+    def query(self, **kwargs):
+        return self.update_info()
+
+    def _seton(self, **kwargs): 
+        self.logger.info('Received SetOn command for group %s from ISY. Setting all %i members to ON.', self.label, len(self.members))
+        for d in self.members:
+            d.set_power(True)
+        return True
+        
+    def _setoff(self, **kwargs): 
+        self.logger.info('Received SetOff command for group %s from ISY. Setting all %i members to OFF.', self.label, len(self.members))
+        for d in self.members:
+            d.set_power(False)
+        return True
+        
+    def _setcolor(self, **kwargs): 
+        _color = int(kwargs.get('value'))
+        for d in self.members:
+            d.set_color(COLORS[_color][1], duration=0, rapid=True)
+        self.logger.info('Received SetColor command for group %s from ISY. Changing color to: %s for all %i members.', self.label, COLORS[_color][0], len(self.members))
+        time.sleep(.2)
+        self.update_info()
+        return True
+        
+    def _sethsbkd(self, **kwargs): return True
+    
+        
+    _drivers = {}
+
+    _commands = {'DON': _seton, 'DOF': _setoff, 'QUERY': query,
+                            'SET_COLOR': _setcolor, 'SET_HSBKD': _sethsbkd}
+
+    node_def_id = 'lifxgroup'

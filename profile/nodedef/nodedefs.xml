@@ -92,4 +92,20 @@
             </accepts>
         </cmds>
     </nodeDef>
+    <!-- LIFX Control -->
+    <nodeDef id="lifxgroup" nls="lifxc">
+        <editors />
+        <sts />
+        <cmds>
+            <sends />
+            <accepts>
+                <cmd id="DON" />
+				<cmd id="DOF" />
+                <cmd id="QUERY" />
+                <cmd id="SET_COLOR">
+                   <p id="" editor="lifxchoice" />
+                </cmd>
+            </accepts>
+        </cmds>
+    </nodeDef>
 </nodeDefs>
