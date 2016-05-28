@@ -27,7 +27,9 @@ class LIFXNodeServer(SimpleNodeServer):
                 i.update_info()
 
     def long_poll(self):
-        pass
+        if len(self.groups) >= 1:
+            for g in self.groups:
+                g.update_info()
         
 
 def main():
