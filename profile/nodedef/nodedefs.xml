@@ -92,18 +92,26 @@
             </accepts>
         </cmds>
     </nodeDef>
-    <!-- LIFX Control -->
-    <nodeDef id="lifxgroup" nls="lifxc">
+    <!-- LIFX Group -->
+    <nodeDef id="lifxgroup" nls="lifxg">
         <editors />
-        <sts />
+        <sts>
+			<st id="ST" editor="lifxclr" />
+		</sts>
         <cmds>
             <sends />
             <accepts>
                 <cmd id="DON" />
 				<cmd id="DOF" />
-                <cmd id="QUERY" />
                 <cmd id="SET_COLOR">
                    <p id="" editor="lifxchoice" />
+                </cmd>
+                <cmd id="SET_HSBKD">
+                    <p id="H" editor="lifxclr" />
+                    <p id="S" editor="lifxclr" />
+                    <p id="B" editor="lifxclr" />
+                    <p id="K" editor="lifxkelvin" />
+                    <p id="D" editor="lifxduration" optional="True" />
                 </cmd>
             </accepts>
         </cmds>

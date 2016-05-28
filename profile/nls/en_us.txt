@@ -64,3 +64,6 @@ CMD-lifxw-SET_HSBKD-NAME = Change BKD
 
 # LIFX Groups
 ND-lifxgroup-NAME = LIFX Group
+ST-lifxg-ST-NAME = Number of Devices in Group
+CMD-lifxg-SET_COLOR-NAME = Set Color To
+CMD-lifxg-SET_HSBKD-NAME = Change HSBKD

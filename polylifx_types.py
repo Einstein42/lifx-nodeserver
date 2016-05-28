@@ -64,7 +64,7 @@ class LIFXControl(Node):
                     self.parent.bulbs.append(LIFXWhite(self.parent, self.parent.get_node('lifxcontrol'), address, name, d, hasColor, manifest))
             gid, glabel, gupdatedat = d.get_group_tuple()
             #Make a new group
-            gaddress = ''.join(random.choice('0123456789abcdef') for i in range(12))
+            gaddress = glabel.replace("'", "").replace(' ', '').lower()[:12]
             lnode = self.parent.get_node(gaddress)
             if not lnode:
                 self.logger.info('Adding new LIFX Group: %s ', glabel)
@@ -278,6 +278,7 @@ class LIFXGroup(Node):
         
     def update_info(self):
         self.members = filter(lambda d: d.group == self.group, self.control.lifx_connector.get_lights())
+        self.set_driver('ST', len(self.members))
         return True
             
     def query(self, **kwargs):
@@ -307,7 +308,7 @@ class LIFXGroup(Node):
     def _sethsbkd(self, **kwargs): return True
     
         
-    _drivers = {}
+    _drivers = {'ST': [0, 56, int]}
 
     _commands = {'DON': _seton, 'DOF': _setoff, 'QUERY': query,
                             'SET_COLOR': _setcolor, 'SET_HSBKD': _sethsbkd}
