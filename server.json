@@ -9,7 +9,7 @@
         {
             "title": "polylifx: A Python library for LIFX",
             "author": "James Milne (Einstein.42)",
-            "version": "0.1.1",
+            "version": "0.1.3",
             "date": "May 21, 2016",
             "source": "https://github.com/Einstein42/lifx-nodeserver",
             "license": "https://github.com/Einstein42/lifx-nodeserver/blob/master/LICENSE"

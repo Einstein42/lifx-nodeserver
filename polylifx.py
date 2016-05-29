@@ -6,7 +6,7 @@
 from polyglot.nodeserver_api import SimpleNodeServer, PolyglotConnector, Node
 from polylifx_types import LIFXControl
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 class LIFXNodeServer(SimpleNodeServer):
     """ LIFX Node Server """

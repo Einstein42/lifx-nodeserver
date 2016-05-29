@@ -82,6 +82,9 @@ restart polyglot again. Everything should pop in fine.
 How To Use
 ~~~~~~~~~~
 
+Node View
+---------
+
 The LIFX Color bulbs work by using 5 settings. HSBKD or Hue, Saturation, Brightness, Kelvin, and Duration.
 Duration is the time it takes for the device to change to the requested HSBK values. This node server allows 
 you to change any of those settings individually on the node view, or individually and all together in a program.  
@@ -103,5 +106,29 @@ When you initally set up the devices(or any subsequest 're-discover devices' ope
 sure all the bulbs are powered on at the switches. After that if you turn them off they will show as 'Online = False'
 in the Node View. They will recover within the 5 seconds described above when power is restored and they 
 reconnect to wifi.
+
+Group Node View
+---------------
+
+Any groups defined in the LIFX App or Web portal is added into the ISY as well. Be careful with the ' character or
+any other special characters. ISY wont add them if there are any in it. I catch a few and replace them with nothing
+but I cant catch them all. 
+
+The Group node view allows you to see the number of devices in the group(updated every 30 seconds). It also 
+allows you to set the color to any of the pre-defined colors, same as in the device itself, or turn the group on or off.
+
+.. image:: _static/group.png
+   :scale: 50 %
+   :align: center
+
+Also just like each individual node you can add a command in your program to set all the HSBK and optional D
+values to update the whole group at once. Hue, Saturation, Brightness, and Kelvin are required for the group command
+as there is no mechanism in the LIFXLan protocol to only update one of the values individually. Duration is optional,
+and will be set to 0 if not specified.
+
+.. image:: _static/group_program.png
+   :scale: 75 %
+   :align: center
+
 
 Please contact me on the UDI forums (Einstein.42) if you have any questions or feature requests.

@@ -157,7 +157,15 @@ class LIFXColor(Node):
         else: self.logger.info('Received manual change, however the bulb is in a disconnected state... ignoring')
         return True
 
-    def _sethsbkd(self, **kwargs): return True
+    def _sethsbkd(self, **kwargs): 
+        try:
+            color = [int(kwargs.get('H.uom56')), int(kwargs.get('S.uom56')), int(kwargs.get('B.uom56')), int(kwargs.get('K.uom26'))]
+            self.duration = int(kwargs.get('D.uom42'))
+        except TypeError:
+            self.duration = 0
+        self.device.set_color(color, duration=self.duration, rapid=True)
+        self.update_info()
+        return True
     
         
     _drivers = {'ST': [0, 25, int], 'GV1': [0, 56, int], 'GV2': [0, 56, int],
@@ -305,7 +313,17 @@ class LIFXGroup(Node):
         self.update_info()
         return True
         
-    def _sethsbkd(self, **kwargs): return True
+    def _sethsbkd(self, **kwargs): 
+        try:
+            color = [int(kwargs.get('H.uom56')), int(kwargs.get('S.uom56')), int(kwargs.get('B.uom56')), int(kwargs.get('K.uom26'))]
+            duration = int(kwargs.get('D.uom42'))
+        except TypeError:
+            duration = 0
+        for d in self.members:
+            d.set_color(color, duration=duration, rapid=True)
+        self.logger.info('Recieved SetHSBKD command for group %s from ISY, Setting all members to Color %s, duration %i', self.label, color, duration)
+        self.update_info()
+        return True
     
         
     _drivers = {'ST': [0, 56, int]}

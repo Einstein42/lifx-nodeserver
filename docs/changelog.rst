@@ -1,6 +1,13 @@
 Changelog
 =====
 
+0.1.3
+~~~~~
+
+Implemented a "Change HSBKD" for each node type (group and bulb) to allow you to change
+all the values at once instead of making a step for each value. See the group documentation
+for usage information.
+
 0.1.2
 ~~~~~
 
