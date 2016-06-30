@@ -5,8 +5,9 @@
 
 from polyglot.nodeserver_api import SimpleNodeServer, PolyglotConnector, Node
 from polylifx_types import LIFXControl
+import yaml
 
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 
 class LIFXNodeServer(SimpleNodeServer):
     """ LIFX Node Server """
@@ -16,6 +17,7 @@ class LIFXNodeServer(SimpleNodeServer):
 
     def setup(self):
         self.logger = self.poly.logger
+        self.logger.info('Config File param: %s', self.poly.configfile)
         manifest = self.config.get('manifest',{})
         self.controller = LIFXControl(self, 'lifxcontrol', 'LIFX Control', True, manifest)
         self.controller._discover()
