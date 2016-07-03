@@ -1,6 +1,18 @@
 Changelog
 =====
 
+0.1.5
+~~~~~
+
+Resolved an issue where the ISY would reboot however the device fields would remain blank
+util changed. These are now refreshed automatically upon the ISY booting up.
+
+0.1.4
+~~~~~
+
+Fixed a bug on which the HSBDK and Status/State variables were not able to be viewed from
+the 'if' portions of a program. This was a small bug in the editor.
+
 0.1.3
 ~~~~~
 

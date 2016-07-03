@@ -117,7 +117,9 @@ class LIFXColor(Node):
             return True
 
     def query(self, **kwargs):
-        return self.update_info()
+        self.update_info()
+        super(LIFXColor, self).query()
+        return True
 
     def _seton(self, **kwargs): 
         self.device.set_power(True)
@@ -216,7 +218,9 @@ class LIFXWhite(Node):
             return True
 
     def query(self, **kwargs):
-        return self.update_info()
+        self.update_info()
+        super(LIFXWhite, self).query()
+        return True
 
     def _seton(self, **kwargs): 
         self.device.set_power(True)
@@ -290,7 +294,9 @@ class LIFXGroup(Node):
         return True
             
     def query(self, **kwargs):
-        return self.update_info()
+        self.update_info()
+        super(LIFXGroup, self).query()
+        return True
 
     def _seton(self, **kwargs): 
         self.logger.info('Received SetOn command for group %s from ISY. Setting all %i members to ON.', self.label, len(self.members))
