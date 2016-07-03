@@ -5,7 +5,8 @@
 
 from polyglot.nodeserver_api import SimpleNodeServer, PolyglotConnector, Node
 from polylifx_types import LIFXControl
-import yaml
+# Test for PyYaml config file.
+#import yaml
 
 VERSION = "0.1.5"
 
@@ -32,7 +33,14 @@ class LIFXNodeServer(SimpleNodeServer):
         if len(self.groups) >= 1:
             for g in self.groups:
                 g.update_info()
-        
+
+    def report_drivers(self):
+        if len(self.bulbs) >= 1:
+            for i in self.bulbs:
+                i.report_driver()
+        if len(self.groups) >= 1:
+            for g in self.groups:
+                g.report_driver()
 
 def main():
     # Setup connection, node server, and nodes

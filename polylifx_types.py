@@ -72,7 +72,7 @@ class LIFXControl(Node):
         return True
 
     def query(self, **kwargs):
-        self._discover()
+        self.parent.report_drivers()
         return True
 
     _drivers = {}
@@ -118,7 +118,7 @@ class LIFXColor(Node):
 
     def query(self, **kwargs):
         self.update_info()
-        super(LIFXColor, self).query()
+        self.report_driver()
         return True
 
     def _seton(self, **kwargs): 
@@ -219,7 +219,7 @@ class LIFXWhite(Node):
 
     def query(self, **kwargs):
         self.update_info()
-        super(LIFXWhite, self).query()
+        self.report_driver()
         return True
 
     def _seton(self, **kwargs): 
@@ -295,7 +295,7 @@ class LIFXGroup(Node):
             
     def query(self, **kwargs):
         self.update_info()
-        super(LIFXGroup, self).query()
+        self.report_driver()
         return True
 
     def _seton(self, **kwargs): 
