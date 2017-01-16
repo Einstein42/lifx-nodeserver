@@ -13,7 +13,7 @@ LIFX_BULB_TABLE = {
                                 18: False, # LIFX White 900 BR30(Low Voltage)
                                 20: True, # LIFX Color 1000 BR30
                                 22: True, # LIFX Color 1000
-                                27: True,
+                                27: True, # LIFX Aa19
                                 }
 
 DEFAULT_DURATION = 0
