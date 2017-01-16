@@ -222,7 +222,7 @@ class LifxLAN:
         self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         self.sock.settimeout(timeout)
-        port = UDP_BROADCAST_PORT
+        port = UDP_BROADCAST_PORT + 1
         self.sock.bind(("", port))
 
     def close_socket(self):
