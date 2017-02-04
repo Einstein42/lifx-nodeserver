@@ -414,7 +414,7 @@ class LIFXMZ(Node):
     def _setcolor(self, **kwargs): 
         if self.connected:
             _color = int(kwargs.get('value'))
-            if self.current_zone = 0
+            if self.current_zone == 0:
                 self.device.set_zone_color(self.current_zone, self.num_zones, self.COLORS[_color][1], duration=self.duration, rapid=False)
             else:
                 self.device.set_zone_color(self.current_zone - 1, self.current_zone - 1, self.COLORS[_color][1], duration=self.duration, rapid=False)
@@ -445,9 +445,13 @@ class LIFXMZ(Node):
         try:
             color = [int(kwargs.get('H.uom56')), int(kwargs.get('S.uom56')), int(kwargs.get('B.uom56')), int(kwargs.get('K.uom26'))]
             self.duration = int(kwargs.get('D.uom42'))
+            current_zone = int(kwargs.get('D.uom56'))
         except TypeError:
             self.duration = 0
-        self.device.set_color(color, duration=self.duration, rapid=False)
+        if current_zone == 0 or current_zone - 1 > self.num_zones:
+            self.device.set_zone_color(0, self.num_zones, self.COLORS[_color][1], duration=self.duration, rapid=False)
+        else:
+            self.device.set_zone_color(current_zone - 1, self.current_zone - 1, self.COLORS[_color][1], duration=self.duration, rapid=False)
         self.update_info()
         return True
     
