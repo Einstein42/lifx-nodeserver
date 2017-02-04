@@ -23,4 +23,8 @@
     <editor id="lifxchoice">
         <range uom="25" subset="0-11" nls="COLOR_CHOICE" />
     </editor>
+    <!-- LIFX Zone Choice Editor -->
+    <editor id="lifxzone">
+        <range uom="56" min="0" max="30" prec="0" step="1" />
+    </editor>
 </editors>
