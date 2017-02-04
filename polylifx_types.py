@@ -3,6 +3,8 @@ import lifxlan
 from lifxlan.device import WorkflowException
 import time
 import random
+import errno
+from socket import error as socket_error
 
 # LIFX Color Capabilities Table per device. True = Color, False = Not
 LIFX_BULB_TABLE = {
@@ -13,7 +15,11 @@ LIFX_BULB_TABLE = {
                                 18: False, # LIFX White 900 BR30(Low Voltage)
                                 20: True, # LIFX Color 1000 BR30
                                 22: True, # LIFX Color 1000
-                                27: True, # LIFX Aa19
+                                27: True, # LIFX A19
+                                28: True, # LIFX BR30
+                                29: True, # LIFX + A19
+                                30: True, # LIFX + BR30
+                                31: True # LIFX Z
                                 }
 
 DEFAULT_DURATION = 0
@@ -56,7 +62,9 @@ class LIFXControl(Node):
             address = d.get_mac_addr().replace(':', '').lower()
             lnode = self.parent.get_node(address)
             if not lnode:
-                hasColor = LIFX_BULB_TABLE[d.get_product()]
+                # Instead of Checking the bulb array and breaking when new bulb types come out,
+                # We will assume the bulb is colored unless it is one of the 3 known white only bulbs.
+                hasColor = True if d.get_product() not in [10, 11, 18] else False
                 if hasColor:
                     self.logger.info('Adding new LIFX Color Bulb: %s(%s)', name, address)
                     self.parent.bulbs.append(LIFXColor(self.parent, self.parent.get_node('lifxcontrol'), address, name, d, hasColor, manifest))
@@ -105,7 +113,10 @@ class LIFXColor(Node):
                 self.set_driver(driver, self.color[ind])
             self.set_driver('ST', self.power)
             self.connected = True
-        except (IOError, TypeError) as e:
+        except (IOError, TypeError, WorkflowException, socket_error) as e:
+            if e.errno == errno.EBADFD: 
+                time.sleep(2)
+                self.update_info()
             if self.connected:
                 self.logger.error('During Query, device %s wasn\'t found. Marking as offline', self.name)
                 self.logger.debug('update_info exception: %s', str(e))
@@ -139,7 +150,7 @@ class LIFXColor(Node):
             _color = int(kwargs.get('value'))
             self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=True)
             self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
-            time.sleep(.2)
+            time.sleep(.5)
             self.update_info()
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         return True
@@ -206,7 +217,10 @@ class LIFXWhite(Node):
                 self.set_driver(driver, self.color[ind])
             self.set_driver('ST', self.power)
             self.connected = True
-        except (IOError, TypeError) as e:
+        except (IOError, TypeError, WorkflowException, socket_error) as e:
+            if e.errno == errno.EBADFD: 
+                time.sleep(2)
+                self.update_info()
             if self.connected:
                 self.logger.error('During Query, device %s wasn\'t found. Marking as offline', self.name)
                 self.logger.debug('update_info exception: %s', str(e))

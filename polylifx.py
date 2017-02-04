@@ -8,7 +8,7 @@ from polylifx_types import LIFXControl
 # Test for PyYaml config file.
 #import yaml
 
-VERSION = "0.1.5"
+VERSION = "0.1.6"
 
 class LIFXNodeServer(SimpleNodeServer):
     """ LIFX Node Server """
