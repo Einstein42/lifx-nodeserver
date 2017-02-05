@@ -328,7 +328,7 @@ class LIFXGroup(Node):
     def _setcolor(self, **kwargs): 
         _color = int(kwargs.get('value'))
         for d in self.members:
-            d.set_color(COLORS[_color][1], duration=0, rapid=True)
+            d.set_color(COLORS[_color][1], duration=0, rapid=False)
         self.logger.info('Received SetColor command for group %s from ISY. Changing color to: %s for all %i members.', self.label, COLORS[_color][0], len(self.members))
         time.sleep(.2)
         self.update_info()
@@ -341,7 +341,7 @@ class LIFXGroup(Node):
         except TypeError:
             duration = 0
         for d in self.members:
-            d.set_color(color, duration=duration, rapid=True)
+            d.set_color(color, duration=duration, rapid=False)
         self.logger.info('Recieved SetHSBKD command for group %s from ISY, Setting all members to Color %s, duration %i', self.label, color, duration)
         self.update_info()
         return True
