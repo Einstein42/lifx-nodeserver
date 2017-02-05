@@ -148,7 +148,7 @@ class LIFXColor(Node):
     def _setcolor(self, **kwargs): 
         if self.connected:
             _color = int(kwargs.get('value'))
-            self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=True)
+            self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=False)
             self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
             time.sleep(.5)
             self.update_info()
@@ -164,7 +164,7 @@ class LIFXColor(Node):
             if _cmd == 'SETB': self.color[2] = _val
             if _cmd == 'SETK': self.color[3] = _val
             if _cmd == 'SETD': self.duration = _val
-            self.device.set_color(self.color, self.duration, rapid=True)
+            self.device.set_color(self.color, self.duration, rapid=False)
             self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), self.duration)
             time.sleep(.2)
             self.update_info()
@@ -177,7 +177,7 @@ class LIFXColor(Node):
             self.duration = int(kwargs.get('D.uom42'))
         except TypeError:
             self.duration = 0
-        self.device.set_color(color, duration=self.duration, rapid=True)
+        self.device.set_color(color, duration=self.duration, rapid=False)
         self.update_info()
         return True
     
@@ -252,7 +252,7 @@ class LIFXWhite(Node):
     def _setcolor(self, **kwargs): 
         if self.connected:
             _color = int(kwargs.get('value'))
-            self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=True)
+            self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=False)
             self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
             time.sleep(.2)
             self.update_info()
@@ -268,7 +268,7 @@ class LIFXWhite(Node):
             if _cmd == 'SETB': self.color[2] = _val
             if _cmd == 'SETK': self.color[3] = _val
             if _cmd == 'SETD': self.duration = _val
-            self.device.set_color(self.color, self.duration, rapid=True)
+            self.device.set_color(self.color, self.duration, rapid=False)
             self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), self.duration)
             time.sleep(.2)
             self.update_info()
@@ -328,7 +328,7 @@ class LIFXGroup(Node):
     def _setcolor(self, **kwargs): 
         _color = int(kwargs.get('value'))
         for d in self.members:
-            d.set_color(COLORS[_color][1], duration=0, rapid=True)
+            d.set_color(COLORS[_color][1], duration=0, rapid=False)
         self.logger.info('Received SetColor command for group %s from ISY. Changing color to: %s for all %i members.', self.label, COLORS[_color][0], len(self.members))
         time.sleep(.2)
         self.update_info()
@@ -341,7 +341,7 @@ class LIFXGroup(Node):
         except TypeError:
             duration = 0
         for d in self.members:
-            d.set_color(color, duration=duration, rapid=True)
+            d.set_color(color, duration=duration, rapid=False)
         self.logger.info('Recieved SetHSBKD command for group %s from ISY, Setting all members to Color %s, duration %i', self.label, color, duration)
         self.update_info()
         return True
