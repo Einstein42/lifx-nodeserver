@@ -114,7 +114,7 @@ class LIFXColor(Node):
             self.set_driver('ST', self.power)
             self.connected = True
         except (IOError, TypeError, WorkflowException, socket_error) as e:
-            if e.errno == errno.EBADFD: 
+            if e.errno == errno.EBADF: 
                 time.sleep(2)
                 self.update_info()
             if self.connected:
@@ -148,7 +148,7 @@ class LIFXColor(Node):
     def _setcolor(self, **kwargs): 
         if self.connected:
             _color = int(kwargs.get('value'))
-            self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=False)
+            self.device.set_color(COLORS[_color][1], self.duration, True)
             self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
             time.sleep(.5)
             self.update_info()
@@ -164,7 +164,7 @@ class LIFXColor(Node):
             if _cmd == 'SETB': self.color[2] = _val
             if _cmd == 'SETK': self.color[3] = _val
             if _cmd == 'SETD': self.duration = _val
-            self.device.set_color(self.color, self.duration, rapid=False)
+            self.device.set_color(self.color, self.duration, True)
             self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), self.duration)
             time.sleep(.2)
             self.update_info()
@@ -174,10 +174,11 @@ class LIFXColor(Node):
     def _sethsbkd(self, **kwargs): 
         try:
             color = [int(kwargs.get('H.uom56')), int(kwargs.get('S.uom56')), int(kwargs.get('B.uom56')), int(kwargs.get('K.uom26'))]
-            self.duration = int(kwargs.get('D.uom42'))
+            duration = int(kwargs.get('D.uom42'))
+            self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), duration)
         except TypeError:
             self.duration = 0
-        self.device.set_color(color, duration=self.duration, rapid=False)
+        self.device.set_color(color, self.duration, True)
         self.update_info()
         return True
     
@@ -218,7 +219,7 @@ class LIFXWhite(Node):
             self.set_driver('ST', self.power)
             self.connected = True
         except (IOError, TypeError, WorkflowException, socket_error) as e:
-            if e.errno == errno.EBADFD: 
+            if e.errno == errno.EBADF: 
                 time.sleep(2)
                 self.update_info()
             if self.connected:
@@ -328,7 +329,7 @@ class LIFXGroup(Node):
     def _setcolor(self, **kwargs): 
         _color = int(kwargs.get('value'))
         for d in self.members:
-            d.set_color(COLORS[_color][1], duration=0, rapid=False)
+            d.set_color(COLORS[_color][1], 0, False)
         self.logger.info('Received SetColor command for group %s from ISY. Changing color to: %s for all %i members.', self.label, COLORS[_color][0], len(self.members))
         time.sleep(.2)
         self.update_info()
@@ -341,7 +342,7 @@ class LIFXGroup(Node):
         except TypeError:
             duration = 0
         for d in self.members:
-            d.set_color(color, duration=duration, rapid=False)
+            d.set_color(color, duration, False)
         self.logger.info('Recieved SetHSBKD command for group %s from ISY, Setting all members to Color %s, duration %i', self.label, color, duration)
         self.update_info()
         return True
