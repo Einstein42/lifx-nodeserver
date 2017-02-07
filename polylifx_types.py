@@ -101,6 +101,8 @@ class LIFXColor(Node):
         self.hasColor = hasColor
         self.connected = True
         self.uptime = 0
+        self.power = False
+        self.color = []
         self.duration = DEFAULT_DURATION
         super(LIFXColor, self).__init__(parent, address, self.name, primary, manifest)
         self.update_info()
