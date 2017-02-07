@@ -1,5 +1,5 @@
 #!/usr/bin/python
-""" LIFX Node Server for Polyglot 
+""" LIFX Node Server for Polyglot
       by Einstein.42(James Milne)
       milne.james@gmail.com"""
 
@@ -14,16 +14,16 @@ class LIFXNodeServer(SimpleNodeServer):
     """ LIFX Node Server """
     controller = []
     bulbs = []
-    groups  = []
+    groups = []
 
     def setup(self):
         self.logger = self.poly.logger
         self.logger.info('Config File param: %s', self.poly.configfile)
-        manifest = self.config.get('manifest',{})
+        manifest = self.config.get('manifest', {})
         self.controller = LIFXControl(self, 'lifxcontrol', 'LIFX Control', True, manifest)
         self.controller._discover()
         self.update_config()
-        
+
     def poll(self):
         if len(self.bulbs) >= 1:
             for i in self.bulbs:
@@ -39,13 +39,13 @@ class LIFXNodeServer(SimpleNodeServer):
             for i in self.bulbs:
                 i.report_driver()
         if len(self.groups) >= 1:
-            for g in self.groups:
-                g.report_driver()
+            for grp in self.groups:
+                grp.report_driver()
 
 def main():
     # Setup connection, node server, and nodes
     poly = PolyglotConnector()
-    # Override shortpoll and longpoll timers to 5/30, once per second in unnessesary 
+    # Override shortpoll and longpoll timers to 5/30, once per second is unnessesary
     nserver = LIFXNodeServer(poly, 5, 30)
     poly.connect()
     poly.wait_for_config()
@@ -53,6 +53,6 @@ def main():
     nserver.setup()
     poly.logger.info("Setup completed. Running Server.")
     nserver.run()
-    
+
 if __name__ == "__main__":
     main()

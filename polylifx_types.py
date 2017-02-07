@@ -46,9 +46,9 @@ def myfloat(value, prec=1):
 
 def nanosec_to_hours(ns):
     return ns/(1000000000.0*60*60)
-    
+
 class LIFXControl(Node):
-    
+
     def __init__(self, *args, **kwargs):
         self.lifx_connector = lifxlan.LifxLAN(None)
         super(LIFXControl, self).__init__(*args, **kwargs)
@@ -87,11 +87,11 @@ class LIFXControl(Node):
     _drivers = {}
 
     _commands = {'DISCOVER': _discover}
-    
+
     node_def_id = 'lifxcontrol'
 
 class LIFXColor(Node):
-    
+
     def __init__(self, parent, primary, address, name, device, hasColor, manifest=None):
         self.parent = parent
         self.address = address
@@ -100,10 +100,11 @@ class LIFXColor(Node):
         self.label = self.device.get_label()
         self.hasColor = hasColor
         self.connected = True
+        self.uptime = 0
         self.duration = DEFAULT_DURATION
         super(LIFXColor, self).__init__(parent, address, self.name, primary, manifest)
         self.update_info()
-        
+
     def update_info(self):
         try:
             self.power = True if self.device.get_power() == 65535 else False
@@ -114,7 +115,7 @@ class LIFXColor(Node):
             self.set_driver('ST', self.power)
             self.connected = True
         except (IOError, TypeError, WorkflowException, socket_error) as e:
-            if e.errno == errno.EBADF: 
+            if e.errno == errno.EBADF:
                 time.sleep(2)
                 self.update_info()
             if self.connected:
@@ -133,19 +134,19 @@ class LIFXColor(Node):
         self.report_driver()
         return True
 
-    def _seton(self, **kwargs): 
+    def _seton(self, **kwargs):
         self.device.set_power(True)
         return True
-        
-    def _setoff(self, **kwargs): 
+
+    def _setoff(self, **kwargs):
         self.device.set_power(False)
         return True
-        
-    def _apply(self, **kwargs): 
+
+    def _apply(self, **kwargs):
         self.logger.info('Received apply command: %s', str(kwargs))
         return True
-        
-    def _setcolor(self, **kwargs): 
+
+    def _setcolor(self, **kwargs):
         if self.connected:
             _color = int(kwargs.get('value'))
             self.device.set_color(COLORS[_color][1], self.duration, True)
@@ -154,8 +155,8 @@ class LIFXColor(Node):
             self.update_info()
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         return True
-        
-    def _setmanual(self, **kwargs): 
+
+    def _setmanual(self, **kwargs):
         if self.connected:
             _cmd = kwargs.get('cmd')
             _val = int(kwargs.get('value'))
@@ -171,7 +172,7 @@ class LIFXColor(Node):
         else: self.logger.info('Received manual change, however the bulb is in a disconnected state... ignoring')
         return True
 
-    def _sethsbkd(self, **kwargs): 
+    def _sethsbkd(self, **kwargs):
         try:
             color = [int(kwargs.get('H.uom56')), int(kwargs.get('S.uom56')), int(kwargs.get('B.uom56')), int(kwargs.get('K.uom26'))]
             duration = int(kwargs.get('D.uom42'))
@@ -181,8 +182,8 @@ class LIFXColor(Node):
         self.device.set_color(color, self.duration, True)
         self.update_info()
         return True
-    
-        
+
+
     _drivers = {'ST': [0, 25, int], 'GV1': [0, 56, int], 'GV2': [0, 56, int],
                             'GV3': [0, 56, int], 'CLITEMP': [0, 26, int],
                             'GV5': [0, 25, int], 'GV6': [0, 20, myfloat],
@@ -196,7 +197,7 @@ class LIFXColor(Node):
     node_def_id = 'lifxcolor'
 
 class LIFXWhite(Node):
-    
+
     def __init__(self, parent, primary, address, name, device, hasColor, manifest=None):
         self.parent = parent
         self.address = address
@@ -208,7 +209,7 @@ class LIFXWhite(Node):
         self.duration = DEFAULT_DURATION
         super(LIFXWhite, self).__init__(parent, address, self.name, primary, manifest)
         self.update_info()
-        
+
     def update_info(self):
         try:
             self.power = True if self.device.get_power() == 65535 else False
@@ -219,7 +220,7 @@ class LIFXWhite(Node):
             self.set_driver('ST', self.power)
             self.connected = True
         except (IOError, TypeError, WorkflowException, socket_error) as e:
-            if e.errno == errno.EBADF: 
+            if e.errno == errno.EBADF:
                 time.sleep(2)
                 self.update_info()
             if self.connected:
@@ -238,19 +239,19 @@ class LIFXWhite(Node):
         self.report_driver()
         return True
 
-    def _seton(self, **kwargs): 
+    def _seton(self, **kwargs):
         self.device.set_power(True)
         return True
-        
-    def _setoff(self, **kwargs): 
+
+    def _setoff(self, **kwargs):
         self.device.set_power(False)
         return True
-        
-    def _apply(self, **kwargs): 
+
+    def _apply(self, **kwargs):
         self.logger.info('Received apply command: %s', str(kwargs))
         return True
-        
-    def _setcolor(self, **kwargs): 
+
+    def _setcolor(self, **kwargs):
         if self.connected:
             _color = int(kwargs.get('value'))
             self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=False)
@@ -259,8 +260,8 @@ class LIFXWhite(Node):
             self.update_info()
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         return True
-        
-    def _setmanual(self, **kwargs): 
+
+    def _setmanual(self, **kwargs):
         if self.connected:
             _cmd = kwargs.get('cmd')
             _val = int(kwargs.get('value'))
@@ -277,8 +278,8 @@ class LIFXWhite(Node):
         return True
 
     def _sethsbkd(self, **kwargs): return True
-    
-        
+
+
     _drivers = {'ST': [0, 25, int], 'GV1': [0, 56, int], 'GV2': [0, 56, int],
                             'GV3': [0, 56, int], 'CLITEMP': [0, 26, int],
                             'GV5': [0, 25, int], 'GV6': [0, 20, myfloat],
@@ -290,9 +291,9 @@ class LIFXWhite(Node):
                             'SET_HSBKD': _sethsbkd}
 
     node_def_id = 'lifxwhite'
-    
+
 class LIFXGroup(Node):
-    
+
     def __init__(self, parent, control, primary, address, id, label, updated_at, manifest=None):
         self.parent = parent
         self.address = address
@@ -303,30 +304,30 @@ class LIFXGroup(Node):
         self.members = None
         super(LIFXGroup, self).__init__(parent, address, 'LIFX Group ' + str(self.label), primary, manifest)
         self.update_info()
-        
+
     def update_info(self):
         self.members = filter(lambda d: d.group == self.group, self.control.lifx_connector.get_lights())
         self.set_driver('ST', len(self.members))
         return True
-            
+
     def query(self, **kwargs):
         self.update_info()
         self.report_driver()
         return True
 
-    def _seton(self, **kwargs): 
+    def _seton(self, **kwargs):
         self.logger.info('Received SetOn command for group %s from ISY. Setting all %i members to ON.', self.label, len(self.members))
         for d in self.members:
             d.set_power(True)
         return True
-        
-    def _setoff(self, **kwargs): 
+
+    def _setoff(self, **kwargs):
         self.logger.info('Received SetOff command for group %s from ISY. Setting all %i members to OFF.', self.label, len(self.members))
         for d in self.members:
             d.set_power(False)
         return True
-        
-    def _setcolor(self, **kwargs): 
+
+    def _setcolor(self, **kwargs):
         _color = int(kwargs.get('value'))
         for d in self.members:
             d.set_color(COLORS[_color][1], 0, False)
@@ -334,8 +335,8 @@ class LIFXGroup(Node):
         time.sleep(.2)
         self.update_info()
         return True
-        
-    def _sethsbkd(self, **kwargs): 
+
+    def _sethsbkd(self, **kwargs):
         try:
             color = [int(kwargs.get('H.uom56')), int(kwargs.get('S.uom56')), int(kwargs.get('B.uom56')), int(kwargs.get('K.uom26'))]
             duration = int(kwargs.get('D.uom42'))
@@ -346,8 +347,8 @@ class LIFXGroup(Node):
         self.logger.info('Recieved SetHSBKD command for group %s from ISY, Setting all members to Color %s, duration %i', self.label, color, duration)
         self.update_info()
         return True
-    
-        
+
+
     _drivers = {'ST': [0, 56, int]}
 
     _commands = {'DON': _seton, 'DOF': _setoff, 'QUERY': query,
