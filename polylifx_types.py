@@ -67,7 +67,7 @@ class LIFXControl(Node):
                 if d.supports_multizone():
                     self.logger.info('Adding new MultiZone Bulb: %s(%s)', name, address)
                     self.parent.bulbs.append(LIFXMZ(self.parent, self.parent.get_node('lifxcontrol'), address, name, d, manifest))
-                if d.supports_color():
+                elif d.supports_color():
                     self.logger.info('Adding new LIFX Color Bulb: %s(%s)', name, address)
                     self.parent.bulbs.append(LIFXColor(self.parent, self.parent.get_node('lifxcontrol'), address, name, d, manifest))
                 else:
