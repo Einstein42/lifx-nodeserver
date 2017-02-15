@@ -415,9 +415,9 @@ class LIFXMZ(Node):
         if self.connected:
             _color = int(kwargs.get('value'))
             if self.current_zone == 0:
-                self.device.set_zone_color(self.current_zone, self.num_zones, self.COLORS[_color][1], duration=self.duration, rapid=False)
+                self.device.set_zone_color(self.current_zone, self.num_zones, COLORS[_color][1], duration=self.duration, rapid=False)
             else:
-                self.device.set_zone_color(self.current_zone - 1, self.current_zone - 1, self.COLORS[_color][1], duration=self.duration, rapid=False)
+                self.device.set_zone_color(self.current_zone - 1, self.current_zone - 1, COLORS[_color][1], duration=self.duration, rapid=False)
             self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
             time.sleep(.02)
             self.update_info()
