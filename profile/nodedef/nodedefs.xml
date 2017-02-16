@@ -11,7 +11,7 @@
         </cmds>
     </nodeDef>
     <!-- NODE DEF from 5.0 document http://wiki.universal-devices.com/index.php?title=V50_MAIN -->
-    <!-- LIFX MultiZone Bulb -->
+	<!-- LIFX MultiZone Bulb -->
     <nodeDef id="lifxmultizone" nls="lifxmz">
         <editors />
         <sts>
@@ -19,11 +19,11 @@
             <st id="GV1" editor="lifxclr" />
             <st id="GV2" editor="lifxclr" />
             <st id="GV3" editor="lifxclr" />
+			<st id="GV4" editor="lifxzone" />
             <st id="CLITEMP" editor="lifxkelvin" />
             <st id="RR" editor="lifxduration" />
             <st id="GV5" editor="lifxpower" />
             <st id="GV6" editor="lifxuptime" />
-			<st id="GV4" editor="lifxzone" />
         </sts>
         <cmds>
             <sends />
@@ -31,6 +31,7 @@
                 <cmd id="DON" />
                 <cmd id="DOF" />
                 <cmd id="QUERY" />
+				<cmd id="APPLY" />
                 <cmd id="SET_COLOR">
                    <p id="" editor="lifxchoice" />
                 </cmd>

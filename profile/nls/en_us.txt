@@ -90,7 +90,6 @@ CMD-lifxmz-SETB-NAME = Set Brightness
 CMD-lifxmz-SETK-NAME = Set Kelvin
 CMD-lifxmz-SETD-NAME = Set Duration
 CMD-lifxmz-SETZ-NAME = Set Zone
-CMD-lifxmz-SET_HSBKD-NAME = Change HSBKD
+CMD-lifxmz-SET_HSBKDZ-NAME = Change HSBKDZ
 CMD-lifxmz-SET_COLOR-NAME = Set Color To
-
-
+CMD-lifxmz-APPLY-NAME = Apply

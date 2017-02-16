@@ -25,6 +25,6 @@
     </editor>
     <!-- LIFX Zone Choice Editor -->
     <editor id="lifxzone">
-        <range uom="56" min="0" max="30" prec="0" step="1" />
-    </editor>
+        <range uom="56" min="0" max="80" prec="0" step="1" />
+    </editor>	
 </editors>

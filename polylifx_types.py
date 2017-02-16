@@ -1,6 +1,5 @@
 from polyglot.nodeserver_api import Node
 import lifxlan
-from lifxlan.device import WorkflowException
 import time
 import random
 import errno
@@ -63,7 +62,6 @@ class LIFXControl(Node):
             address = d.get_mac_addr().replace(':', '').lower()
             lnode = self.parent.get_node(address)
             if not lnode:
-                #This has not been been implemented by the current release version of lifxlan.
                 if d.supports_multizone():
                     self.logger.info('Adding new MultiZone Bulb: %s(%s)', name, address)
                     self.parent.bulbs.append(LIFXMZ(self.parent, self.parent.get_node('lifxcontrol'), address, name, d, manifest))
@@ -101,6 +99,8 @@ class LIFXColor(Node):
         self.device = device
         self.label = self.device.get_label()
         self.connected = True
+        self.tries = 0
+        self.uptime = 0
         self.duration = DEFAULT_DURATION
         super(LIFXColor, self).__init__(parent, address, self.name, primary, manifest)
         self.update_info()
@@ -114,13 +114,14 @@ class LIFXColor(Node):
                 self.set_driver(driver, self.color[ind])
             self.set_driver('ST', self.power)
             self.connected = True
-        except (IOError, TypeError, WorkflowException, socket_error) as e:
-            if e.errno == errno.EBADFD: 
-                time.sleep(2)
+            self.tries = 0
+        except (IOError, TypeError) as e:
+            tries += 1
+            time.sleep(.5)
+            if tries < 10: 
                 self.update_info()
-            if self.connected:
-                self.logger.error('During Query, device %s wasn\'t found. Marking as offline', self.name)
-                self.logger.debug('update_info exception: %s', str(e))
+            else:
+                self.logger.error('During Query, device color %s wasn\'t found. Marking as offline', self.name)
                 self.connected = False
                 self.uptime = 0
         finally:
@@ -135,11 +136,15 @@ class LIFXColor(Node):
         return True
 
     def _seton(self, **kwargs): 
-        self.device.set_power(True)
+        try:
+            self.device.set_power(True)
+        except IOError: pass
         return True
         
-    def _setoff(self, **kwargs): 
-        self.device.set_power(False)
+    def _setoff(self, **kwargs):
+        try:
+            self.device.set_power(False)
+        except IOError: pass
         return True
         
     def _apply(self, **kwargs): 
@@ -149,7 +154,9 @@ class LIFXColor(Node):
     def _setcolor(self, **kwargs): 
         if self.connected:
             _color = int(kwargs.get('value'))
-            self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=False)
+            try:
+                self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=False)
+            except IOError: pass
             self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
             time.sleep(.02)
             self.update_info()
@@ -165,7 +172,9 @@ class LIFXColor(Node):
             if _cmd == 'SETB': self.color[2] = _val
             if _cmd == 'SETK': self.color[3] = _val
             if _cmd == 'SETD': self.duration = _val
-            self.device.set_color(self.color, self.duration, rapid=False)
+            try:
+                self.device.set_color(self.color, self.duration, rapid=False)
+            except IOError: pass
             self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), self.duration)
             time.sleep(.2)
             self.update_info()
@@ -178,7 +187,9 @@ class LIFXColor(Node):
             self.duration = int(kwargs.get('D.uom42'))
         except TypeError:
             self.duration = 0
-        self.device.set_color(color, duration=self.duration, rapid=False)
+        try:
+            self.device.set_color(color, duration=self.duration, rapid=False)
+        except IOError: pass
         self.update_info()
         return True
     
@@ -364,7 +375,11 @@ class LIFXMZ(Node):
         self.num_zones = len(self.device.get_color_zones())
         self.current_zone = 0
         self.label = self.device.get_label()
+        self.new_color = []
         self.connected = True
+        self.uptime = 0
+        self.tries = 0
+        self.pending = False
         self.duration = DEFAULT_DURATION
         super(LIFXMZ, self).__init__(parent, address, self.name, primary, manifest)
         self.update_info()
@@ -372,19 +387,21 @@ class LIFXMZ(Node):
     def update_info(self):
         try:
             self.power = True if self.device.get_power() == 65535 else False
-            self.color = self.device.get_color_zones()
+            if not self.pending:
+                self.color = self.device.get_color_zones()
             self.uptime = nanosec_to_hours(self.device.get_uptime())
             for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP')):
                 self.set_driver(driver, self.color[self.current_zone][ind])
             self.set_driver('ST', self.power)
             self.connected = True
-        except (IOError, TypeError, WorkflowException, socket_error) as e:
-            if e.errno == errno.EBADFD: 
-                time.sleep(2)
+            self.tries = 0
+        except (IOError, TypeError) as e:
+            tries += 1
+            time.sleep(.5)
+            if tries < 10: 
                 self.update_info()
-            if self.connected:
-                self.logger.error('During Query, device %s wasn\'t found. Marking as offline', self.name)
-                self.logger.debug('update_info exception: %s', str(e))
+            else:
+                self.logger.error('During Query, device mz %s wasn\'t found. Marking as offline', self.name)
                 self.connected = False
                 self.uptime = 0
         finally:
@@ -400,27 +417,37 @@ class LIFXMZ(Node):
         return True
 
     def _seton(self, **kwargs): 
-        self.device.set_power(True)
+        try:
+            self.device.set_power(True)
+        except IOError: pass
         return True
         
     def _setoff(self, **kwargs): 
-        self.device.set_power(False)
+        try:
+            self.device.set_power(False)
+        except IOError: pass
         return True
         
-    def _apply(self, **kwargs): 
+    def _apply(self, **kwargs):
+        try:
+            self.device.set_zone_colors(self.new_color, self.duration, rapid=True)
+        except IOError: pass
         self.logger.info('Received apply command: %s', str(kwargs))
+        self.pending = False
         return True
         
     def _setcolor(self, **kwargs): 
         if self.connected:
-            _color = int(kwargs.get('value'))
-            if self.current_zone == 0:
-                self.device.set_zone_color(self.current_zone, self.num_zones, COLORS[_color][1], duration=self.duration, rapid=False)
-            else:
-                self.device.set_zone_color(self.current_zone - 1, self.current_zone - 1, COLORS[_color][1], duration=self.duration, rapid=False)
-            self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
-            time.sleep(.02)
-            self.update_info()
+            try:
+                _color = int(kwargs.get('value'))
+                if self.current_zone == 0:
+                    self.device.set_zone_color(self.current_zone, self.num_zones, COLORS[_color][1], duration=self.duration, rapid=True)
+                else:
+                    self.device.set_zone_color(self.current_zone - 1, self.current_zone - 1, COLORS[_color][1], duration=self.duration, rapid=True)
+                self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
+                time.sleep(.02)
+                self.update_info()
+            except IOError: pass
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         return True
         
@@ -433,25 +460,32 @@ class LIFXMZ(Node):
             if _cmd == 'SETB': self.color[2] = _val
             if _cmd == 'SETK': self.color[3] = _val
             if _cmd == 'SETD': self.duration = _val
-            if _cmd == 'SETZ': self.current_zone = _val
-            self.device.set_color(self.color, self.duration, rapid=False)
-            self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), self.duration)
+            if _cmd == 'SETZ': self.current_zone = int(_val)
+            try:
+                self.device.set_color(self.color, self.duration, rapid=True)
+            except IOError: pass
+            self.logger.info('Received manual change, updating the mz bulb to: %s duration: %i', str(self.color), self.duration)
             time.sleep(.2)
             self.update_info()
-        else: self.logger.info('Received manual change, however the bulb is in a disconnected state... ignoring')
+        else: self.logger.info('Received manual change, however the mz bulb is in a disconnected state... ignoring')
         return True
 
-    def _sethsbkdz(self, **kwargs): 
+    def _sethsbkdz(self, **kwargs):
+        if not self.pending:
+            self.new_color = deepcopy(self.color)
+            self.pending = True
+        current_zone = int(kwargs.get('Z.uom56'))
+        self.new_color[current_zone - 1] = [int(kwargs.get('H.uom56')), int(kwargs.get('S.uom56')), int(kwargs.get('B.uom56')), int(kwargs.get('K.uom26'))]
         try:
-            color = [int(kwargs.get('H.uom56')), int(kwargs.get('S.uom56')), int(kwargs.get('B.uom56')), int(kwargs.get('K.uom26'))]
             self.duration = int(kwargs.get('D.uom42'))
-            current_zone = int(kwargs.get('D.uom56'))
         except TypeError:
             self.duration = 0
-        if current_zone == 0 or current_zone - 1 > self.num_zones:
-            self.device.set_zone_color(0, self.num_zones, self.COLORS[_color][1], duration=self.duration, rapid=False)
-        else:
-            self.device.set_zone_color(current_zone - 1, self.current_zone - 1, self.COLORS[_color][1], duration=self.duration, rapid=False)
+        try:
+            if current_zone == 0:
+                self.device.set_zone_color(0, self.num_zones, self.new_color, self.duration, True)
+            else:
+                self.device.set_zone_color(current_zone - 1, current_zone - 1, self.new_color, self.duration, True, 0)
+        except IOError: pass
         self.update_info()
         return True
     
