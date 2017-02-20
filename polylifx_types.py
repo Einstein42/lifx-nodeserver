@@ -378,6 +378,7 @@ class LIFXMZ(Node):
         self.new_color = []
         self.connected = True
         self.uptime = 0
+        self.color = []
         self.tries = 0
         self.pending = False
         self.duration = DEFAULT_DURATION
@@ -385,6 +386,7 @@ class LIFXMZ(Node):
         self.update_info()
         
     def update_info(self):
+        self.tries = 0
         try:
             self.power = True if self.device.get_power() == 65535 else False
             if not self.pending:
@@ -394,7 +396,6 @@ class LIFXMZ(Node):
                 self.set_driver(driver, self.color[self.current_zone][ind])
             self.set_driver('ST', self.power)
             self.connected = True
-            self.tries = 0
         except (IOError, TypeError) as e:
             tries += 1
             time.sleep(.5)
@@ -446,7 +447,6 @@ class LIFXMZ(Node):
                     self.device.set_zone_color(self.current_zone - 1, self.current_zone - 1, COLORS[_color][1], duration=self.duration, rapid=True)
                 self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
                 time.sleep(.02)
-                self.update_info()
             except IOError: pass
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         return True
@@ -455,18 +455,23 @@ class LIFXMZ(Node):
         if self.connected:
             _cmd = kwargs.get('cmd')
             _val = int(kwargs.get('value'))
-            if _cmd == 'SETH': self.color[0] = _val
-            if _cmd == 'SETS': self.color[1] = _val
-            if _cmd == 'SETB': self.color[2] = _val
-            if _cmd == 'SETK': self.color[3] = _val
-            if _cmd == 'SETD': self.duration = _val
-            if _cmd == 'SETZ': self.current_zone = int(_val)
-            try:
-                self.device.set_color(self.color, self.duration, rapid=True)
-            except IOError: pass
-            self.logger.info('Received manual change, updating the mz bulb to: %s duration: %i', str(self.color), self.duration)
+            try:            
+                if _cmd == 'SETZ': self.current_zone = int(_val)
+                zone = self.current_zone
+                if self.current_zone != 0: zone -= 1
+                new_color = list(self.color[zone])
+                if _cmd == 'SETH': new_color[0] = int(_val)
+                if _cmd == 'SETS': new_color[1] = int(_val)
+                if _cmd == 'SETB': new_color[2] = int(_val)
+                if _cmd == 'SETK': new_color[3] = int(_val)
+                if _cmd == 'SETD': self.duration = _val
+                if self.current_zone == 0:
+                    self.device.set_zone_color(0, self.num_zones, new_color, self.duration, True)
+                else:
+                    self.device.set_zone_color(self.current_zone, self.current_zone, new_color, self.duration, True, 0)
+            except (IOError, TypeError) as ex: self.logger.error('setmanual mz error %s', ex)
+            self.logger.info('Received manual change, updating the mz bulb zone %i to: %s duration: %i', zone, new_color, self.duration)
             time.sleep(.2)
-            self.update_info()
         else: self.logger.info('Received manual change, however the mz bulb is in a disconnected state... ignoring')
         return True
 
@@ -486,7 +491,6 @@ class LIFXMZ(Node):
             else:
                 self.device.set_zone_color(current_zone - 1, current_zone - 1, self.new_color, self.duration, True, 0)
         except IOError: pass
-        self.update_info()
         return True
     
         
