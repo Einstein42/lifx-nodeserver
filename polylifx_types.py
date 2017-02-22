@@ -116,11 +116,10 @@ class LIFXColor(Node):
                 self.set_driver(driver, self.color[ind])
             self.set_driver('ST', self.power)
             self.connected = True
-        except (IOError, TypeError, WorkflowException, socket_error) as e:
+        except (IOError, TypeError, IOError, socket_error) as e:
             if e.errno == errno.EBADF:
-                time.sleep(2)
-                self.update_info()
-            if self.connected:
+                pass
+            elif self.connected:
                 self.logger.error('During Query, device %s wasn\'t found. Marking as offline', self.name)
                 self.logger.debug('update_info exception: %s', str(e))
                 self.connected = False
@@ -153,8 +152,6 @@ class LIFXColor(Node):
             _color = int(kwargs.get('value'))
             self.device.set_color(COLORS[_color][1], self.duration, True)
             self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
-            time.sleep(.5)
-            self.update_info()
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         return True
 
@@ -169,8 +166,6 @@ class LIFXColor(Node):
             if _cmd == 'SETD': self.duration = _val
             self.device.set_color(self.color, self.duration, True)
             self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), self.duration)
-            time.sleep(.2)
-            self.update_info()
         else: self.logger.info('Received manual change, however the bulb is in a disconnected state... ignoring')
         return True
 
@@ -182,7 +177,6 @@ class LIFXColor(Node):
         except TypeError:
             self.duration = 0
         self.device.set_color(color, self.duration, True)
-        self.update_info()
         return True
 
 
@@ -334,8 +328,6 @@ class LIFXGroup(Node):
         for d in self.members:
             d.set_color(COLORS[_color][1], 0, False)
         self.logger.info('Received SetColor command for group %s from ISY. Changing color to: %s for all %i members.', self.label, COLORS[_color][0], len(self.members))
-        time.sleep(.2)
-        self.update_info()
         return True
 
     def _sethsbkd(self, **kwargs):
@@ -347,7 +339,6 @@ class LIFXGroup(Node):
         for d in self.members:
             d.set_color(color, duration, False)
         self.logger.info('Recieved SetHSBKD command for group %s from ISY, Setting all members to Color %s, duration %i', self.label, color, duration)
-        self.update_info()
         return True
 
 
