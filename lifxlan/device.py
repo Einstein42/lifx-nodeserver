@@ -1,3 +1,4 @@
+# device.py
 # Author: Meghan Clark
 # This file contains a Device object that exposes a high-level API for interacting
 # with a LIFX device, and which caches some of the more persistent state attributes
