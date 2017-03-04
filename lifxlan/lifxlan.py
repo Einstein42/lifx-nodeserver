@@ -113,7 +113,7 @@ class LifxLAN:
             else:
                 print("{} is not a valid power level.".format(power_level))
         except WorkflowException as e:
-            print(e)
+            raise(e)
 
     def get_color_all_lights(self):
         responses = self.broadcast_with_resp(LightGet, LightState)
@@ -132,7 +132,7 @@ class LifxLAN:
                 else:
                     self.broadcast_with_ack(LightSetColor, {"color": color, "duration": duration})
             except WorkflowException as e:
-                print(e)
+                raise(e)
         else:
             print("{} is not a valid color.".format(color))
 
@@ -144,7 +144,7 @@ class LifxLAN:
                 else:
                     self.broadcast_with_ack(LightSetWaveform, {"transient": is_transient, "color": color, "period": period, "cycles": cycles, "duty_cycle": duty_cycle, "waveform": waveform})
             except WorkflowException as e:
-                print(e)
+                raise(e)
         else:
             print("{} is not a valid color.".format(color))
 
@@ -269,7 +269,7 @@ class LifxLAN:
         self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         self.sock.settimeout(timeout)
-        port = UDP_BROADCAST_PORT + 1
+        port = UDP_BROADCAST_PORT
         self.sock.bind(("", port))
 
     def close_socket(self):

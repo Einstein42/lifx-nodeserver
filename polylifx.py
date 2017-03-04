@@ -21,7 +21,7 @@ class LIFXNodeServer(SimpleNodeServer):
         self.logger.info('Config File param: %s', self.poly.configfile)
         manifest = self.config.get('manifest',{})
         self.controller = LIFXControl(self, 'lifxcontrol', 'LIFX Control', True, manifest)
-        self.controller._discover()
+        self.controller.discover()
         self.update_config()
         
     def poll(self):

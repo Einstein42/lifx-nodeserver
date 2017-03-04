@@ -53,7 +53,7 @@ class LIFXControl(Node):
         self.lifx_connector = lifxlan.LifxLAN(None)
         super(LIFXControl, self).__init__(*args, **kwargs)
 
-    def _discover(self, *args, **kwargs):
+    def discover(self, *args, **kwargs):
         manifest = self.parent.config.get('manifest', {})
         devices = self.lifx_connector.get_lights()
         self.logger.info('%i bulbs found. Checking status and adding to ISY', len(devices))
@@ -86,7 +86,7 @@ class LIFXControl(Node):
 
     _drivers = {}
 
-    _commands = {'DISCOVER': _discover}
+    _commands = {'DISCOVER': discover}
     
     node_def_id = 'lifxcontrol'
 
@@ -101,11 +101,15 @@ class LIFXColor(Node):
         self.connected = True
         self.tries = 0
         self.uptime = 0
+        self.lastupdate = None
+        self.updating = False
         self.duration = DEFAULT_DURATION
         super(LIFXColor, self).__init__(parent, address, self.name, primary, manifest)
-        self.update_info()
+        self.query()
         
     def update_info(self):
+        if self.updating == True: return True
+        self.updating = True
         try:
             self.power = True if self.device.get_power() == 65535 else False
             self.color = list(self.device.get_color())
@@ -115,19 +119,20 @@ class LIFXColor(Node):
             self.set_driver('ST', self.power)
             self.connected = True
             self.tries = 0
-        except (IOError, TypeError) as e:
-            tries += 1
-            time.sleep(.5)
-            if tries < 10: 
-                self.update_info()
-            else:
+        except (lifxlan.WorkflowException, IOError, TypeError) as ex:
+            self.updating = False
+            if time.time() - self.lastupdate >= 60:
                 self.logger.error('During Query, device color %s wasn\'t found. Marking as offline', self.name)
                 self.connected = False
                 self.uptime = 0
-        finally:
+            else:
+                self.logger.error('Connection Error on color update_info. This happens from time to time, normally safe to ignore. %s', str(ex))
+        else:
             self.set_driver('GV5', self.connected)
             self.set_driver('GV6', self.uptime)
             self.set_driver('RR', self.duration)
+            self.updating = False
+            self.lastupdate = time.time()
             return True
 
     def query(self, **kwargs):
@@ -138,13 +143,13 @@ class LIFXColor(Node):
     def _seton(self, **kwargs): 
         try:
             self.device.set_power(True)
-        except IOError: pass
+        except (lifxlan.WorkflowException, IOError): pass
         return True
         
     def _setoff(self, **kwargs):
         try:
             self.device.set_power(False)
-        except IOError: pass
+        except (lifxlan.WorkflowException, IOError): pass
         return True
         
     def _apply(self, **kwargs): 
@@ -156,7 +161,7 @@ class LIFXColor(Node):
             _color = int(kwargs.get('value'))
             try:
                 self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=False)
-            except IOError: pass
+            except (lifxlan.WorkflowException, IOError): pass
             self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
             time.sleep(.02)
             self.update_info()
@@ -174,7 +179,7 @@ class LIFXColor(Node):
             if _cmd == 'SETD': self.duration = _val
             try:
                 self.device.set_color(self.color, self.duration, rapid=False)
-            except IOError: pass
+            except (lifxlan.WorkflowException, IOError): pass
             self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), self.duration)
             time.sleep(.2)
             self.update_info()
@@ -189,7 +194,7 @@ class LIFXColor(Node):
             self.duration = 0
         try:
             self.device.set_color(color, duration=self.duration, rapid=False)
-        except IOError: pass
+        except (lifxlan.WorkflowException, IOError): pass
         self.update_info()
         return True
     
@@ -312,7 +317,8 @@ class LIFXGroup(Node):
         self.updated_at = updated_at
         self.members = None
         super(LIFXGroup, self).__init__(parent, address, 'LIFX Group ' + str(self.label), primary, manifest)
-        self.update_info()
+        time.sleep(.5)
+        self.query()
         
     def update_info(self):
         self.members = filter(lambda d: d.group == self.group, self.control.lifx_connector.get_lights())
@@ -378,15 +384,20 @@ class LIFXMZ(Node):
         self.new_color = []
         self.connected = True
         self.uptime = 0
+        self.power = False
         self.color = []
-        self.tries = 0
+        self.uptime = None
+        self.lastupdate = None
         self.pending = False
+        self.updating = False
         self.duration = DEFAULT_DURATION
         super(LIFXMZ, self).__init__(parent, address, self.name, primary, manifest)
-        self.update_info()
+        time.sleep(.5)
+        self.query()
         
     def update_info(self):
-        self.tries = 0
+        if self.updating: return
+        self.updating = True
         try:
             self.power = True if self.device.get_power() == 65535 else False
             if not self.pending:
@@ -396,20 +407,23 @@ class LIFXMZ(Node):
                 self.set_driver(driver, self.color[self.current_zone][ind])
             self.set_driver('ST', self.power)
             self.connected = True
-        except (IOError, TypeError) as e:
-            tries += 1
-            time.sleep(.5)
-            if tries < 10: 
-                self.update_info()
-            else:
-                self.logger.error('During Query, device mz %s wasn\'t found. Marking as offline', self.name)
+        except (lifxlan.WorkflowException, IOError, TypeError) as ex:
+            if time.time() - self.lastupdate >= 60:
+                self.logger.error('During Query, device mz %s wasn\'t found for over 60 seconds. Marking as offline', self.name)
                 self.connected = False
                 self.uptime = 0
-        finally:
+                self.lastupdate = time.time()
+            else:
+                self.logger.error('Connection Error on mz update_info. This happens from time to time, normally safe to ignore. %s', str(ex))
+                time.sleep(.1)
+            self.updating = False
+        else:
             self.set_driver('GV4', self.current_zone)
             self.set_driver('GV5', self.connected)
             self.set_driver('GV6', self.uptime)
             self.set_driver('RR', self.duration)
+            self.updating = False
+            self.lastupdate = time.time()
             return True
 
     def query(self, **kwargs):
@@ -420,21 +434,24 @@ class LIFXMZ(Node):
     def _seton(self, **kwargs): 
         try:
             self.device.set_power(True)
-        except IOError: pass
+        except (lifxlan.WorkflowException, IOError): pass
         return True
         
     def _setoff(self, **kwargs): 
         try:
             self.device.set_power(False)
-        except IOError: pass
+        except (lifxlan.WorkflowException, IOError): pass
         return True
         
     def _apply(self, **kwargs):
         try:
+            self.updating = True
             self.device.set_zone_colors(self.new_color, self.duration, rapid=True)
-        except IOError: pass
+        except (lifxlan.WorkflowException, IOError): pass
         self.logger.info('Received apply command: %s', str(kwargs))
         self.pending = False
+        self.updating = False
+        time.sleep(.1)
         return True
         
     def _setcolor(self, **kwargs): 
@@ -447,7 +464,8 @@ class LIFXMZ(Node):
                     self.device.set_zone_color(self.current_zone - 1, self.current_zone - 1, COLORS[_color][1], duration=self.duration, rapid=True)
                 self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
                 time.sleep(.02)
-            except IOError: pass
+            except (lifxlan.WorkflowException, IOError) as ex:
+                self.logger.error('mz setcolor error %s', str(ex))
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         return True
         
@@ -465,13 +483,16 @@ class LIFXMZ(Node):
                 if _cmd == 'SETB': new_color[2] = int(_val)
                 if _cmd == 'SETK': new_color[3] = int(_val)
                 if _cmd == 'SETD': self.duration = _val
+                self.updating = True
                 if self.current_zone == 0:
                     self.device.set_zone_color(0, self.num_zones, new_color, self.duration, True)
                 else:
                     self.device.set_zone_color(self.current_zone, self.current_zone, new_color, self.duration, True, 0)
-            except (IOError, TypeError) as ex: self.logger.error('setmanual mz error %s', ex)
+                self.updating = False
+            except (lifxlan.WorkflowException, TypeError) as ex:
+                self.updating = False
+                self.logger.error('setmanual mz error %s', ex)
             self.logger.info('Received manual change, updating the mz bulb zone %i to: %s duration: %i', zone, new_color, self.duration)
-            time.sleep(.2)
         else: self.logger.info('Received manual change, however the mz bulb is in a disconnected state... ignoring')
         return True
 
@@ -486,11 +507,15 @@ class LIFXMZ(Node):
         except TypeError:
             self.duration = 0
         try:
+            self.updating = True
             if current_zone == 0:
                 self.device.set_zone_color(0, self.num_zones, self.new_color, self.duration, True)
             else:
                 self.device.set_zone_color(current_zone - 1, current_zone - 1, self.new_color, self.duration, True, 0)
-        except IOError: pass
+            self.updating = False
+        except (lifxlan.WorkflowException, IOError) as ex:
+            self.logger.error('set mz hsbkdz error %s', str(ex))
+            self.updating = False
         return True
     
         

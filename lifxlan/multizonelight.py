@@ -10,12 +10,6 @@ class MultiZoneLight(Light):
     def __init__(self, mac_addr, ip_addr, service=1, port=56700, source_id=0, verbose=False):
         super(MultiZoneLight, self).__init__(mac_addr, ip_addr)
 
-
-    # This only gets the first StateMultiZone/StateZone response packet,
-    # but there may be several!!!
-    # Really need a special MultiZone send/recv function!
-    # right now can fake it by making multiple requests with different indices
-    # Need to add check that end is larger than start
     # 0 indexed, inclusive
     def get_color_zones(self, start=0, end=255):
         #try:
@@ -61,7 +55,7 @@ class MultiZoneLight(Light):
                                       {"start_index": start_index, "end_index": end_index, "color": color,
                                        "duration": duration, "apply": apply})
             except WorkflowException as e:
-                print(e)
+                raise(e)
 
     # Sets colors for all zones given a list of HSVK colors
     def set_zone_colors(self, colors, duration=0, rapid=False):
