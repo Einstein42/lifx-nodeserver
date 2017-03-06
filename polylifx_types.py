@@ -467,7 +467,7 @@ class LIFXMZ(Node):
                 self.color = self.device.get_color_zones()
             self.uptime = nanosec_to_hours(self.device.get_uptime())
             for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP')):
-                self.set_driver(driver, self.color[self.current_zone][ind])
+                self.set_driver(driver, self.color[self.current_zone - 1][ind])
             self.set_driver('ST', self.power)
             self.connected = True
         except (lifxlan.WorkflowException, IOError, TypeError) as ex:
@@ -530,7 +530,7 @@ class LIFXMZ(Node):
             except (lifxlan.WorkflowException, IOError) as ex:
                 self.logger.error('mz setcolor error %s', str(ex))
             for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP')):
-                self.set_driver(driver, self.color[self.current_zone][ind])
+                self.set_driver(driver, self.color[self.current_zone - 1][ind])
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         return True
         
@@ -540,6 +540,7 @@ class LIFXMZ(Node):
             _val = int(kwargs.get('value'))
             try:            
                 if _cmd == 'SETZ': self.current_zone = int(_val)
+                if self.current_zone > self.num_zones: self.current_zone = 0
                 zone = self.current_zone
                 if self.current_zone != 0: zone -= 1
                 new_color = list(self.color[zone])
