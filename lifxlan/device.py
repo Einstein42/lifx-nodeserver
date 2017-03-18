@@ -284,6 +284,9 @@ class Device(object):
         return updated_at
 
     def get_group_tuple(self):
+        response = None
+        label = None
+        updated_at = None
         try:
             response = self.req_with_resp(GetGroup, StateGroup)
             self.group = response.group
