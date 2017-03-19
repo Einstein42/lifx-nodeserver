@@ -193,7 +193,7 @@ class LIFXColor(Node):
                 self.device.set_color(self.color, self.duration, rapid=False)
             except (lifxlan.WorkflowException, IOError): pass
             self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), self.duration)
-            for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP')):
+            for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP', 'RR')):
                 self.set_driver(driver, self.color[ind])
         else: self.logger.info('Received manual change, however the bulb is in a disconnected state... ignoring')
         self.updating = False
@@ -559,7 +559,7 @@ class LIFXMZ(Node):
             except (lifxlan.WorkflowException, TypeError) as ex:
                 self.updating = False
                 self.logger.error('setmanual mz error %s', ex)
-            for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP')):
+            for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'GV4' 'CLITEMP', 'RR')):
                 self.set_driver(driver, self.color[zone][ind])
             self.logger.info('Received manual change, updating the mz bulb zone %i to: %s duration: %i', zone, new_color, self.duration)
         else: self.logger.info('Received manual change, however the mz bulb is in a disconnected state... ignoring')
