@@ -18,6 +18,7 @@
 # per device, and also to capture in real time when a service is down (port = 0).
 
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR, SO_BROADCAST, timeout, error
+import errno
 from msgtypes import *
 from unpack import unpack_lifx_message
 from time import time, sleep
@@ -465,8 +466,11 @@ class Device(object):
                             device_response = response
                             self.ip_addr = ip_addr
                             success = True
-                except timeout:
-                    pass
+                except (timeout, socket.error) as e:
+                    if e.errno == socket.EBADF:
+                        pass
+                    else:
+                        pass
                 elapsed_time = time() - start_time
                 timedout = True if elapsed_time > timeout_secs else False
             attempts += 1

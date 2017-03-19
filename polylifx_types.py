@@ -46,9 +46,9 @@ def myfloat(value, prec=1):
 
 def nanosec_to_hours(ns):
     return ns/(1000000000.0*60*60)
-    
+
 class LIFXControl(Node):
-    
+
     def __init__(self, *args, **kwargs):
         self.lifx_connector = lifxlan.LifxLAN(None)
         super(LIFXControl, self).__init__(*args, **kwargs)
@@ -158,8 +158,8 @@ class LIFXColor(Node):
         except (lifxlan.WorkflowException, IOError): pass
         self.updating = False
         return True
-        
-    def _apply(self, **kwargs): 
+
+    def _apply(self, **kwargs):
         self.logger.info('Received apply command: %s', str(kwargs))
         return True
         
@@ -177,7 +177,6 @@ class LIFXColor(Node):
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         self.updating = False
         return True
-        
     def _setmanual(self, **kwargs): 
         if self.updating == True: return
         self.updating = True
@@ -204,7 +203,8 @@ class LIFXColor(Node):
         self.updating = True
         try:
             color = [int(kwargs.get('H.uom56')), int(kwargs.get('S.uom56')), int(kwargs.get('B.uom56')), int(kwargs.get('K.uom26'))]
-            self.duration = int(kwargs.get('D.uom42'))
+            duration = int(kwargs.get('D.uom42'))
+            self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), duration)
         except TypeError:
             self.duration = 0
         try:
@@ -212,8 +212,8 @@ class LIFXColor(Node):
         except (lifxlan.WorkflowException, IOError): pass
         self.updating = False
         return True
-    
-        
+
+
     _drivers = {'ST': [0, 25, int], 'GV1': [0, 56, int], 'GV2': [0, 56, int],
                             'GV3': [0, 56, int], 'CLITEMP': [0, 26, int],
                             'GV5': [0, 25, int], 'GV6': [0, 20, myfloat],
@@ -227,7 +227,6 @@ class LIFXColor(Node):
     node_def_id = 'lifxcolor'
 
 class LIFXWhite(Node):
-    
     def __init__(self, parent, primary, address, name, device, manifest=None):
         self.parent = parent
         self.address = address
@@ -239,7 +238,7 @@ class LIFXWhite(Node):
         self.duration = DEFAULT_DURATION
         super(LIFXWhite, self).__init__(parent, address, self.name, primary, manifest)
         self.update_info()
-        
+
     def update_info(self):
         if self.updating == True: return
         self.updating = True
@@ -252,7 +251,7 @@ class LIFXWhite(Node):
             self.set_driver('ST', self.power)
             self.connected = True
         except (IOError, TypeError, WorkflowException, socket_error) as e:
-            if e.errno == errno.EBADFD: 
+            if e.errno == errno.EBADF:
                 time.sleep(2)
                 self.update_info()
             if self.connected:
@@ -289,11 +288,11 @@ class LIFXWhite(Node):
         except (lifxlan.WorkflowException, IOError): pass
         self.updating = False
         return True
-        
-    def _apply(self, **kwargs): 
+
+    def _apply(self, **kwargs):
         self.logger.info('Received apply command: %s', str(kwargs))
         return True
-        
+
     def _setcolor(self, **kwargs):
         if self.updating == True: return
         self.updating = True
@@ -308,7 +307,7 @@ class LIFXWhite(Node):
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         self.updating = False
         return True
-        
+
     def _setmanual(self, **kwargs): 
         if self.updating == True: return
         self.updating = True
@@ -331,8 +330,8 @@ class LIFXWhite(Node):
         return True
 
     def _sethsbkd(self, **kwargs): return True
-    
-        
+
+
     _drivers = {'ST': [0, 25, int], 'GV1': [0, 56, int], 'GV2': [0, 56, int],
                             'GV3': [0, 56, int], 'CLITEMP': [0, 26, int],
                             'GV5': [0, 25, int], 'GV6': [0, 20, myfloat],
@@ -344,9 +343,9 @@ class LIFXWhite(Node):
                             'SET_HSBKD': _sethsbkd}
 
     node_def_id = 'lifxwhite'
-    
+
 class LIFXGroup(Node):
-    
+
     def __init__(self, parent, control, primary, address, id, label, updated_at, manifest=None):
         self.parent = parent
         self.address = address
@@ -358,12 +357,12 @@ class LIFXGroup(Node):
         self.members = None
         super(LIFXGroup, self).__init__(parent, address, 'LIFX Group ' + str(self.label), primary, manifest)
         time.sleep(.5)
-        
+
     def update_info(self):
         self.members = filter(lambda d: d.group == self.group, self.control.lifx_connector.get_lights())
         self.set_driver('ST', len(self.members))
         return True
-            
+
     def query(self, **kwargs):
         self.update_info()
         self.report_driver()
@@ -380,7 +379,7 @@ class LIFXGroup(Node):
                 self.logger.error('group seton error caught %s', str(ex))
         self.updating = False
         return True
-        
+      
     def _setoff(self, **kwargs):
         if self.updating: return
         self.updating = True
@@ -392,7 +391,7 @@ class LIFXGroup(Node):
                 self.logger.error('group setoff error caught %s', str(ex))
         self.updating = False
         return True
-        
+
     def _setcolor(self, **kwargs):
         if self.updating: return
         self.updating = True
@@ -425,8 +424,8 @@ class LIFXGroup(Node):
         self.logger.info('Recieved SetHSBKD command for group %s from ISY, Setting all members to Color %s, duration %i', self.label, color, duration)
         self.updating = False
         return True
-    
-        
+
+
     _drivers = {'ST': [0, 56, int]}
 
     _commands = {'DON': _seton, 'DOF': _setoff, 'QUERY': query,
