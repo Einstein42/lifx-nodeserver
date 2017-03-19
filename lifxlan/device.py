@@ -466,10 +466,7 @@ class Device(object):
                             device_response = response
                             self.ip_addr = ip_addr
                             success = True
-                except (timeout, socket.error) as e:
-                    if e.errno == socket.EBADF:
-                        pass
-                    else:
+                except (timeout, error) as e:
                         pass
                 elapsed_time = time() - start_time
                 timedout = True if elapsed_time > timeout_secs else False
