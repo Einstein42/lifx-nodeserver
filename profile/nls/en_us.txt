@@ -44,6 +44,7 @@ CMDP-S-NAME = Saturation
 CMDP-B-NAME = Brightness
 CMDP-K-NAME = Kelvin
 CMDP-D-NAME = Duration
+CMDP-Z-NAME = Zone Number
 
 # White Bulbs
 ND-lifxwhite-NAME = LIFX Color Bulb
@@ -67,3 +68,28 @@ ND-lifxgroup-NAME = LIFX Group
 ST-lifxg-ST-NAME = Number of Devices in Group
 CMD-lifxg-SET_COLOR-NAME = Set Color To
 CMD-lifxg-SET_HSBKD-NAME = Change HSBKD
+
+# MultiZone Bulbs
+ND-lifxmultizone-NAME = LIFX MultiZone Bulb
+ST-lifxmz-NAME = LIFX Bulb
+ST-lifxmz-ST-NAME = Bulb On
+ST-lifxmz-GV1-NAME = Hue
+ST-lifxmz-GV2-NAME = Saturation
+ST-lifxmz-GV3-NAME = Brightness
+ST-lifxmz-GV4-NAME = Current Zone
+ST-lifxmz-CLITEMP-NAME = Kelvin
+ST-lifxmz-GV5-NAME = Online
+ST-lifxmz-GV6-NAME = Uptime
+ST-lifxmz-RR-NAME = Duration
+CMD-lifxmz-DON-NAME = On
+CMD-lifxmz-DOF-NAME = Off
+CMD-lifxmz-QUERY-NAME = Query
+CMD-lifxmz-SETH-NAME = Set Hue
+CMD-lifxmz-SETS-NAME = Set Saturation
+CMD-lifxmz-SETB-NAME = Set Brightness
+CMD-lifxmz-SETK-NAME = Set Kelvin
+CMD-lifxmz-SETD-NAME = Set Duration
+CMD-lifxmz-SETZ-NAME = Set Zone
+CMD-lifxmz-SET_HSBKDZ-NAME = Change HSBKDZ
+CMD-lifxmz-SET_COLOR-NAME = Set Color To
+CMD-lifxmz-APPLY-NAME = Apply
