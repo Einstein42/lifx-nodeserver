@@ -164,12 +164,12 @@ class LIFXColor(Node):
         return True
         
     def _setcolor(self, **kwargs): 
-        if self.updating == True: return
+        if self.updating == True: return True
         self.updating = True
         if self.connected:
             _color = int(kwargs.get('value'))
             try:
-                self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=False)
+                self.device.set_color(COLORS[_color][1], duration=self.duration, rapid=True)
             except (lifxlan.WorkflowException, IOError): pass
             self.logger.info('Received SetColor command from ISY. Changing color to: %s', COLORS[_color][0])
             for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP')):
@@ -177,8 +177,9 @@ class LIFXColor(Node):
         else: self.logger.info('Received SetColor, however the bulb is in a disconnected state... ignoring')
         self.updating = False
         return True
+        
     def _setmanual(self, **kwargs): 
-        if self.updating == True: return
+        if self.updating == True: return True
         self.updating = True
         if self.connected:
             _cmd = kwargs.get('cmd')
@@ -189,17 +190,18 @@ class LIFXColor(Node):
             if _cmd == 'SETK': self.color[3] = _val
             if _cmd == 'SETD': self.duration = _val
             try:
-                self.device.set_color(self.color, self.duration, rapid=False)
+                self.device.set_color(self.color, self.duration, rapid=True)
             except (lifxlan.WorkflowException, IOError): pass
             self.logger.info('Received manual change, updating the bulb to: %s duration: %i', str(self.color), self.duration)
             for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP')):
                 self.set_driver(driver, self.color[ind])
+            self.set_driver('RR', self.duration)
         else: self.logger.info('Received manual change, however the bulb is in a disconnected state... ignoring')
         self.updating = False
         return True
 
     def _sethsbkd(self, **kwargs):
-        if self.updating == True: return
+        if self.updating == True: return True
         self.updating = True
         try:
             color = [int(kwargs.get('H.uom56')), int(kwargs.get('S.uom56')), int(kwargs.get('B.uom56')), int(kwargs.get('K.uom26'))]
@@ -449,7 +451,7 @@ class LIFXMZ(Node):
         self.power = False
         self.color = []
         self.uptime = None
-        self.lastupdate = None
+        self.lastupdate = 0
         self.pending = False
         self.updating = False
         self.duration = DEFAULT_DURATION
@@ -458,7 +460,7 @@ class LIFXMZ(Node):
         self.query()
         
     def update_info(self):
-        if self.updating: return
+        if self.updating: return True
         self.updating = True
         try:
             self.power = True if self.device.get_power() == 65535 else False
@@ -560,6 +562,8 @@ class LIFXMZ(Node):
                 self.logger.error('setmanual mz error %s', ex)
             for ind, driver in enumerate(('GV1', 'GV2', 'GV3', 'CLITEMP')):
                 self.set_driver(driver, self.color[zone][ind])
+            self.set_driver('GV4', self.current_zone)
+            self.set_driver('RR', self.duration)
             self.logger.info('Received manual change, updating the mz bulb zone %i to: %s duration: %i', zone, new_color, self.duration)
         else: self.logger.info('Received manual change, however the mz bulb is in a disconnected state... ignoring')
         return True
