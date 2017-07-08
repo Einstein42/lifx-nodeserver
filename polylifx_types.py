@@ -77,7 +77,7 @@ class LIFXControl(Node):
             lnode = self.parent.get_node(gaddress)
             if not lnode:
                 self.logger.info('Adding new LIFX Group: %s ', glabel)
-                self.parent.groups.append(LIFXGroup(self.parent, self, self.parent.get_node('lifxcontrol'), gaddress, gid, glabel, gupdatedat, manifest))
+                self.parent.groups.append(LIFXGroup(self.parent, self, self.parent.get_node('lifxcontrol'), gaddress, gid, glabel.replace("'", ""), gupdatedat, manifest))
         self.parent.long_poll()
         return True
 
@@ -592,9 +592,8 @@ class LIFXMZ(Node):
         
     _drivers = {'ST': [0, 25, int], 'GV1': [0, 56, int], 'GV2': [0, 56, int],
                             'GV3': [0, 56, int], 'CLITEMP': [0, 26, int],
-                            'GV4': [0, 56, int],
-                            'GV5': [0, 25, int], 'GV6': [0, 20, myfloat],
-                            'RR': [0, 42, int]}
+                            'GV4': [0, 56, int], 'GV5': [0, 25, int], 
+                            'GV6': [0, 20, myfloat], 'RR': [0, 42, int]}
 
     _commands = {'DON': _seton, 'DOF': _setoff, 'QUERY': query,
                             'APPLY': _apply, 'SET_COLOR': _setcolor, 'SETH': _setmanual,
